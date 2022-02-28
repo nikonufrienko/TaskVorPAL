@@ -5,7 +5,6 @@ import com.github.javaparser.ast.stmt.IfStmt
 import org.python.util.PythonInterpreter
 import java.io.*
 import java.nio.file.Files
-import java.util.*
 
 
 data class ResultOfConditionChecking(
@@ -22,7 +21,7 @@ fun checkConditionStack(
 ): ResultOfConditionChecking {
     var availableCounter = 0
     val listOfWrongCheckingIndexes = mutableListOf<Int>()
-    for (conditionSource in conditionStack.reversed()) {
+    for ((index, conditionSource) in conditionStack.withIndex()) {
         var isActive = false //если здесь обнаружиться сравнение переменной с null
         val listForIgnore = mutableListOf<Expression>() //эти узлы будем игнорировать
         var conditionForChanging: Node =
@@ -71,7 +70,7 @@ fun checkConditionStack(
                         conditionSource.end.get().line,
                         "Always false when ${currName.name} == null"
                     )
-
+                    listOfWrongCheckingIndexes.addAll(conditionStack.subList(index + 1,conditionStack.size).map{ it.end.get().line})
                     return ResultOfConditionChecking(
                         AvailableStatus.NEVER_AVAILABLE,
                         listOfWrongCheckingIndexes,

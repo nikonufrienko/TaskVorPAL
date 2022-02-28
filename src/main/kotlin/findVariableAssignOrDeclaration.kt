@@ -59,7 +59,7 @@ data class AssignOrDeclaredValue(
                     )
                 } else {
                     description += "[External variable!!]"
-                    return CheckingResult(isNotNullParameter, description) // переменная рассматривается как notNull
+                    return CheckingResult(isNotNullParameter, description) // переменная рассматривается как default
                 }
             }
         }

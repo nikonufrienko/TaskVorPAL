@@ -3,10 +3,11 @@ import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.stmt.IfStmt
 
 
-fun NameExpr.checkVariable(commentingEnabled: Boolean = true,
-                           isNotNullParameter:Boolean = false
-                           // передаётся ли переменная в качестве notNull параметра в метод?
-                            // если да -- то опасным источником будет считаться аргумент без аннотаций
+fun NameExpr.checkVariable(
+    commentingEnabled: Boolean = true,
+    isNotNullParameter: Boolean = false
+    // передаётся ли переменная в качестве notNull параметра в метод?
+    // если да -- то опасным источником будет считаться аргумент без аннотаций
 ): CheckingResult {
     this.checkSwitchStatements()
     val analyzer = this.findVariableAssignOrDeclaration()
@@ -37,11 +38,16 @@ fun NameExpr.checkVariable(commentingEnabled: Boolean = true,
         }
 
         if ((!switchCheckingResult.first) && (ifElseStmt == null || switchCheckingResult.second.contain(ifElseStmt))) {
-            if(commentingEnabled) StaticCommentsCollector.addComment(
+            if (commentingEnabled) StaticCommentsCollector.addComment(
                 switchCheckingResult.second.begin.get().line,
                 "[ERROR: ${this} may be null there!!]"
             )
             secondIsDanger = false
+        }
+        if (commentingEnabled) {
+            uselessCheckingLinesList.forEach {
+                StaticCommentsCollector.addComment(it, "[Useless checking for $this]")
+            }
         }
         return CheckingResult(secondIsDanger, firstAnalyze.description)
     }

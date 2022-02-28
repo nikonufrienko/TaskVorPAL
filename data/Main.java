@@ -75,6 +75,10 @@ public class Main {
         if (variable == null || 1 != 0) {
             variable.foo();
         }
+
+        if (variable == null || 1 != 0) {
+            variable.foo();
+        }
         switch (nullP) {
             case 1 -> nullP.x;
         }
