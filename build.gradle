@@ -1,0 +1,48 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.6.10'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+apply plugin: 'java'
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation 'com.github.javaparser:javaparser-core:3.24.0'
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.24.0'
+    implementation 'org.python:jython-slim:2.7.2'
+}
+
+
+test {
+    useJUnitPlatform()
+}
+
+
+shadowJar {
+    destinationDirectory = file("out")
+    manifest {
+        attributes 'Main-Class': 'Main'
+    }
+}
+
+/*
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    destinationDirectory = file("out")
+    manifest {
+        attributes "Main-Class": "Main"
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}*/
