@@ -8,7 +8,7 @@ import java.lang.IllegalArgumentException
 
 
 fun parseGroupedMethods(@NotNull input: String): List<List<MethodDeclaration>> {
-    val parsingError:String
+    val parsingError: String
     try {
         val cu = StaticJavaParser.parse(input)
         val methodsGroups = mutableListOf<MutableList<MethodDeclaration>>()
@@ -32,10 +32,11 @@ class ArgKeys {
             Pair("-xml", StaticCommentsCollector::writeXMLFile),
             Pair("-json", StaticCommentsCollector::writeJSONFile)
         )
+
         val modifiers = mapOf(
             Pair("-yaml", ".yml"),
             Pair("-xml", ".xml"),
-            Pair("-json", ".json")
+            Pair("-json", ".json"),
         )
     }
 }
@@ -45,10 +46,15 @@ fun main(args: Array<String>) {
         throw IllegalArgumentException("There are no arguments!")
     }
     val filePath = args[0]
+
+    if (!args.copyOfRange(1, args.size).contains("--use-native-python")) {
+        StaticSolver.initJythonSolver()
+    }
+    val fileFormatArgKeys = mutableSetOf<String>()
     args.copyOfRange(1, args.size).forEach {
-        if (!ArgKeys.argumentActions.keys.contains(it)) {
-            throw IllegalArgumentException("Wrong argument: $it!")
-        }
+        if (!ArgKeys.argumentActions.keys.contains(it) && it != "--use-native-python") {
+            throw IllegalArgumentException("Wrong argument: $it")
+        } else if(ArgKeys.argumentActions.keys.contains(it)) fileFormatArgKeys.add(it)
     }
 
     val fileString = try {
@@ -74,9 +80,8 @@ fun main(args: Array<String>) {
             StaticCommentsCollector.addComments(findUselessChecking(method))
         }
     }
-    StaticSolver.initJythonSolver()
 
-    args.copyOfRange(1, args.size)
+    fileFormatArgKeys
         .forEach {
             ArgKeys.argumentActions[it]!!.invoke(filePath.modifyFilePath(ArgKeys.modifiers[it]!!))
         }

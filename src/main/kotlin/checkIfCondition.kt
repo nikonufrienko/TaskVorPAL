@@ -100,10 +100,8 @@ enum class AvailableStatus { MAYBE_AVAILABLE, NEVER_AVAILABLE } //TODO: пере
 
 class StaticSolver {
     companion object {
-        private lateinit var jythonSolver: JythonSolver
         private var useJythonSolver = false
         fun initJythonSolver() {
-            jythonSolver = JythonSolver()
             useJythonSolver = true
         }
 
@@ -120,6 +118,7 @@ class StaticSolver {
                 process.outputStream.flush()
                 result = process.inputStream.bufferedReader().readLine()
             } else {
+                val jythonSolver = JythonSolver()
                 jythonSolver.runPythonScript(input)
                 result = jythonSolver.inputStream.bufferedReader().readLine()
             }
