@@ -4,8 +4,10 @@ import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.stmt.IfStmt
 import org.python.util.PythonInterpreter
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.io.File
+import java.io.OutputStream
 
 data class ResultOfConditionChecking(
     val availableStatus: AvailableStatus,
@@ -164,6 +166,7 @@ class JythonSolver() {
 
     init {
         pyInterp.setIn(inputStream)
+        pyInterp.setOut(ByteArrayOutputStream())
     }
 
     fun runPythonScript(valueToSolve: String) {

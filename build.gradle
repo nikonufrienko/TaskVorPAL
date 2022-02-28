@@ -34,15 +34,3 @@ shadowJar {
         attributes 'Main-Class': 'Main'
     }
 }
-
-/*
-jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    destinationDirectory = file("out")
-    manifest {
-        attributes "Main-Class": "Main"
-    }
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}*/
