@@ -16,7 +16,7 @@ public class Main {
             Point defaultP // may be null but we don't care
     ) {
         Integer s1 = new Integer(1), s2 = new Integer(2);
-        if (sdefaultP != null) {
+        if (nonNullP != null) {
             int x = nonNullP.x;
         }
 

@@ -11,9 +11,9 @@ fun NameExpr.checkVariable(commentingEnabled: Boolean = true,
     this.checkSwitchStatements()
     val analyzer = this.findVariableAssignOrDeclaration()
     val firstAnalyze = analyzer.getAnaliseNullByDeclarationOrAssign(isNotNullParameter)
-    var isDanger = firstAnalyze.isDanger
     val uselessCheckingLinesList = mutableListOf<Int>() // список для бесполезных if-ов
     if (firstAnalyze.isDanger) {
+        var secondIsDanger = true //презумпция виновности!
         val switchCheckingResult = this.checkSwitchStatements()
         val thenConditionsAndElseConditions = analyzer.getConditions()
         val ifCondRes =
@@ -23,32 +23,29 @@ fun NameExpr.checkVariable(commentingEnabled: Boolean = true,
         uselessCheckingLinesList.addAll(ifCondRes.indexesOfUselessChecking!!)
         uselessCheckingLinesList.addAll(elseCondRes.indexesOfUselessChecking!!)
         var ifElseStmt: IfStmt? = null
-        if (ifCondRes.availableStatus == AvailableStatus.MAYBE_AVAILABLE && elseCondRes.availableStatus == AvailableStatus.MAYBE_AVAILABLE) {
-            if ((elseCondRes.blockingIfStmt == null && ifCondRes.blockingIfStmt != null)
-                || ((elseCondRes.blockingIfStmt != null && ifCondRes.blockingIfStmt != null) && ifCondRes.blockingIfStmt.end.get()
-                    .isBefore(elseCondRes.blockingIfStmt.end.get()))
-            ) {
-                ifElseStmt = ifCondRes.blockingIfStmt
-            } else if (elseCondRes.blockingIfStmt != null) {
-                ifElseStmt = elseCondRes.blockingIfStmt
-            }
+
+        if ((elseCondRes.blockingIfStmt == null && ifCondRes.blockingIfStmt != null)
+            || ((elseCondRes.blockingIfStmt != null && ifCondRes.blockingIfStmt != null) && ifCondRes.blockingIfStmt.end.get()
+                .isBefore(elseCondRes.blockingIfStmt.end.get()))
+        ) {
+            ifElseStmt = ifCondRes.blockingIfStmt
+        } else if (elseCondRes.blockingIfStmt != null) {
+            ifElseStmt = elseCondRes.blockingIfStmt
         }
+        if (ifCondRes.availableStatus == AvailableStatus.NEVER_AVAILABLE || elseCondRes.availableStatus == AvailableStatus.NEVER_AVAILABLE) {
+            secondIsDanger = false
+        }
+
         if ((!switchCheckingResult.first) && (ifElseStmt == null || switchCheckingResult.second.contain(ifElseStmt))) {
             if(commentingEnabled) StaticCommentsCollector.addComment(
                 switchCheckingResult.second.begin.get().line,
                 "[ERROR: ${this} may be null there!!]"
             )
-            isDanger = false
-        } else if (ifElseStmt != null) {
-            isDanger = false
-            if(commentingEnabled) StaticCommentsCollector.addComment(
-                ifElseStmt.end.get().line,
-                "[ERROR: ${this} may be null there!!]"
-            )
-            ifElseStmt.end.get()
+            secondIsDanger = false
         }
+        return CheckingResult(secondIsDanger, firstAnalyze.description)
     }
-    return CheckingResult(isDanger, firstAnalyze.description)
+    return CheckingResult(false, firstAnalyze.description)
 }
 
 fun <T : Node> Node.contain(javaClass: Class<T>): Boolean = this.findAll(javaClass).isNotEmpty()

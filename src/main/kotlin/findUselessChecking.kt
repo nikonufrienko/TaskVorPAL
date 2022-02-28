@@ -10,7 +10,7 @@ fun findUselessChecking(method: MethodDeclaration): Map<Int, String> {
         ifStmt.findAll(NullLiteralExpr::class.java).forEach { nullExpr ->
             if (nullExpr.parentNode.get()::class.java == BinaryExpr::class.java) {
                 nullExpr.parentNode.get().findAll(NameExpr::class.java).forEach { nameExpr ->
-                    if (!nameExpr.checkVariable(commentingEnabled = false).isDanger) {
+                    if (!nameExpr.checkVariable(commentingEnabled = false, isNotNullParameter = true).isDanger) {
                         resultComments[nameExpr.end.get().line] = "[useless null checking]"
                     }
                 }

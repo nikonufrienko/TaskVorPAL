@@ -3,11 +3,10 @@ import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.stmt.IfStmt
 import org.python.util.PythonInterpreter
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
+import java.io.*
 import java.nio.file.Files
-import java.io.File
-import java.io.OutputStream
+import java.util.*
+
 
 data class ResultOfConditionChecking(
     val availableStatus: AvailableStatus,
@@ -121,8 +120,7 @@ class StaticSolver {
                 result = process.inputStream.bufferedReader().readLine()
             } else {
                 val jythonSolver = JythonSolver()
-                jythonSolver.runPythonScript(input)
-                result = jythonSolver.inputStream.bufferedReader().readLine()
+                result= jythonSolver.runPythonScript(input)
             }
             if (result.isEmpty()) error("python script error")
             return when (result) {
@@ -161,15 +159,16 @@ class JythonSolver() {
                     "    print(\"only false\")"
     }
 
-    private val pyInterp = PythonInterpreter()
-    val inputStream = ByteArrayInputStream(ByteArray(1024))
 
-    init {
-        pyInterp.setIn(inputStream)
-        pyInterp.setOut(ByteArrayOutputStream())
-    }
 
-    fun runPythonScript(valueToSolve: String) {
+    fun runPythonScript(valueToSolve: String): String{
+        val pyInterp = PythonInterpreter()
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        val outputStream = PrintStream(byteArrayOutputStream)
+        pyInterp.setOut(outputStream)
         pyInterp.exec("line = \"${valueToSolve}\" \n" + pythonSolverScript)
+
+        return String(byteArrayOutputStream.toByteArray()).trim()
     }
 }
+
